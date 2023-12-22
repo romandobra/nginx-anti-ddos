@@ -16,3 +16,14 @@ sys	0m0.012s
 ```
 
 ## The logic
+
+
+## deny_ip convention
+
+```
+$ cat /etc/nginx/conf.d/nad_deny_ip.conf
+location / {
+    error_page 403 http://example.com/forbidden.html;
+    deny 1.2.3.4; # DENY_TIMESTAMP
+}
+```
