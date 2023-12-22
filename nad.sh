@@ -6,17 +6,19 @@ set -e
 
 export NAD_LOG_FILE='access_log'
 export NAD_LINES_TO_CHECK=200
-export NAD_COOLDOWN=300 # seconds
+export NAD_COOLDOWN=500 # seconds
 
 export NAD_DENY_FILE='nad_deny_ip.conf'
 #export NAD_DENY_PAGE='# error_page 403 http://example.com/forbidden.html;'
 
 _NAD_RUNDATE=$(date +%s)
 
-# count log lines
-NAD_LOG_COUNT=($(wc -l access_log | cut -d' ' -f1))
+[ -e .settings ] && source .settings
 
-if [ $NAD_LOG_COUNT -gt $NAD_LINES_TO_CHECK ]; then
+# count log lines
+_NAD_LOG_COUNT=($(wc -l access_log | cut -d' ' -f1))
+
+if [ $_NAD_LOG_COUNT -gt $NAD_LINES_TO_CHECK ]; then
 # count requests from each IP
     eval "declare -A nad_state=(
         $(  tail -n$NAD_LINES_TO_CHECK $NAD_LOG_FILE \
