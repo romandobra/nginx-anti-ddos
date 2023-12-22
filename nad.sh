@@ -11,9 +11,9 @@ export NAD_COOLDOWN=500 # seconds
 export NAD_DENY_FILE='nad_deny_ip.conf'
 #export NAD_DENY_PAGE='# error_page 403 http://example.com/forbidden.html;'
 
-_NAD_RUNDATE=$(date +%s)
-
 [ -e .settings ] && source .settings
+
+_NAD_RUNDATE=$(date +%s)
 
 # count log lines
 _NAD_LOG_COUNT=($(wc -l access_log | cut -d' ' -f1))
