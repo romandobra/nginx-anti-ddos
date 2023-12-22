@@ -18,7 +18,7 @@ sys	0m0.012s
 ## The logic
 
 
-## deny_ip convention
+## deny_ip file convention
 
 ```
 $ cat /etc/nginx/conf.d/nad_deny_ip.conf
