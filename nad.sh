@@ -2,6 +2,8 @@
 
 set -e
 
+# TODO prevent multiple instances (pid lock)
+
 export NAD_LOG_FILE='access_log'
 export NAD_LINES_TO_CHECK=200
 export NAD_DENY_PAGE='# error_page 403 http://example.com/forbidden.html;'
