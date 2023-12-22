@@ -11,6 +11,9 @@ export NAD_COOLDOWN=500 # seconds
 export NAD_DENY_FILE='nad_deny_ip.conf'
 #export NAD_DENY_PAGE='# error_page 403 http://example.com/forbidden.html;'
 
+# redefine this function if you need reports
+nad_report_attack(){ true; }
+
 [ -e .settings ] && source .settings
 
 _NAD_RUNDATE=$(date +%s)
