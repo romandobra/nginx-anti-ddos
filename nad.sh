@@ -6,6 +6,8 @@ set -e
 
 export NAD_LOG_FILE='access_log'
 export NAD_LINES_TO_CHECK=200
+#export NAD_MIN_IP_COUNT=5
+export NAD_MAX_REQUESTS=3
 export NAD_COOLDOWN=500 # seconds
 
 export NAD_DENY_FILE='nad_deny_ip.conf'
@@ -30,7 +32,11 @@ if [ $_NAD_LOG_COUNT -gt $NAD_LINES_TO_CHECK ]; then
             | uniq -c \
             | while read _number _ip
                 do
-                    echo "[$_ip]=$_number"
+
+# skip if lower than NAD_MAX_REQUESTS
+                    if [ $_number -gt $NAD_MAX_REQUESTS ]; then
+                        echo "[$_ip]=$_number"
+                    fi
                 done
         )
     )"
@@ -43,6 +49,8 @@ eval "declare -A nad_blocked=(
         | while read _ _ip _date
             do
                 _date=(${_date//[^[:alnum:]]/})
+
+# remove denied if cooldown is over
                 if [ $(($_NAD_RUNDATE - $_date )) -lt $NAD_COOLDOWN ]; then
                     echo "[${_ip%;}]=$_date"
                 fi
@@ -58,12 +66,6 @@ echo blocked ${#nad_blocked[@]}
 #    echo "$i - ${nad_state[$i]}"
 # done
 # echo total ${#nad_state[@]}
-
-# check rates
-
-# remove denied if cooldown is over
-
-
 
 # update deny_ip file
 # reload nginx
