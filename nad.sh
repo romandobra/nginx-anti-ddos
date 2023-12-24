@@ -2,18 +2,18 @@
 
 set -e
 
+export NAD_TESTING=true # dont restart nginx (default)
 export NAD_WHITE_LIST='43.142.47.190'
 export NAD_LOG_FILE='access_log'
 export NAD_LINES_TO_CHECK=100
 export NAD_MAX_REQUESTS=2
-export NAD_COOLDOWN=5 # seconds
-#export NAD_LOG_GREP="cat" # for testing
+export NAD_COOLDOWN=5
 export NAD_LOG_GREP="grep -e '$(date '+%d/%b/%Y:%H:%M')' -e '$(date -d 'minute ago' '+%d/%b/%Y:%H:%M')'"
 
 export NAD_DENY_FILE='nad_deny_ip.conf'
-#export NAD_DENY_PAGE='# error_page 403 http://example.com/forbidden.html;'
+# TODO export NAD_DENY_PAGE='# error_page 403 http://example.com/forbidden.html;'
 
-# redefine this function if you need reports other than sdtout
+############################## define report function
 nad_report(){ echo "$1"; }
 
 _NAD_RUNDATE=$(date +%s)
@@ -24,7 +24,7 @@ _NAD_LOCK_FILE="/var/lock/nad"
 
 echo $_NAD_RUNDATE > $_NAD_LOCK_FILE
 
-# list blocked
+############################## list blocked
 eval "declare -A nad_blocked=(
     $(
         {
@@ -43,11 +43,11 @@ eval "declare -A nad_blocked=(
     )
 )"
 
+############################## list new requests
 # count log lines
 _NAD_LOG_COUNT=($(wc -l $NAD_LOG_FILE | cut -d' ' -f1))
 
 if [ $_NAD_LOG_COUNT -gt $NAD_LINES_TO_CHECK ]; then
-# count requests from each IP
     eval "declare -A nad_state=(
         $({
         tail -n$NAD_LINES_TO_CHECK $NAD_LOG_FILE \
@@ -63,7 +63,6 @@ if [ $_NAD_LOG_COUNT -gt $NAD_LINES_TO_CHECK ]; then
 
 # skip if aready blocked
                     [ "${nad_blocked[$_ip]+abc}" ] && continue
-#                    if [[ -v nad_blocked[$_ip] ]];then continue; fi
 
                     echo "[$_ip]=$_number"
                 done
@@ -71,17 +70,14 @@ if [ $_NAD_LOG_COUNT -gt $NAD_LINES_TO_CHECK ]; then
     )"
 fi
 
-# echo "# new ${#nad_state[@]}"
-# echo "# old ${#nad_blocked[@]}"
-
-# update deny_ip file
+############################## update deny_ip file
 {
     echo 'location / {'
 
     echo "# new ${#nad_state[@]} at $_NAD_RUNDATE"
     for i in ${!nad_state[@]}; do
 
-# whitelisted
+# comment whitelisted
         if [[ $NAD_WHITE_LIST =~ $i ]]; then
             echo "# whitelisted $i #$_NAD_RUNDATE"
         else
@@ -97,11 +93,13 @@ fi
 } > $NAD_DENY_FILE
 
 
-# reload nginx, try first
-/usr/sbin/nginx -tq && {
-    service nginx reload \
-        && rm -rf $_NAD_LOCK_FILE \
-        || nad_report "nad cant reload nginx"
-} || {
-    nad_report "nad cant check nginx conf"
-}
+############################## reload nginx, try first
+[ ! $NAD_TESTING ] && {
+    /usr/sbin/nginx -tq && {
+        service nginx reload \
+            && rm -rf $_NAD_LOCK_FILE \
+            || nad_report "nad cant reload nginx"
+    } || {
+        nad_report "nad cant check nginx conf"
+    }
+} || rm -rf $_NAD_LOCK_FILE
