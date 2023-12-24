@@ -2,25 +2,27 @@
 
 set -e
 
-# TODO prevent multiple instances (pid lock)
-
 export NAD_WHITE_LIST='43.142.47.190'
 export NAD_LOG_FILE='access_log'
 export NAD_LINES_TO_CHECK=100
 export NAD_MAX_REQUESTS=2
 export NAD_COOLDOWN=5 # seconds
-export NAD_LOG_GREP="cat" # for testing
-#export NAD_LOG_GREP="grep -e '$(date '+%d/%b/%Y:%H:%M')' -e '$(date -d 'minute ago' '+%d/%b/%Y:%H:%M')'"
+#export NAD_LOG_GREP="cat" # for testing
+export NAD_LOG_GREP="grep -e '$(date '+%d/%b/%Y:%H:%M')' -e '$(date -d 'minute ago' '+%d/%b/%Y:%H:%M')'"
 
 export NAD_DENY_FILE='nad_deny_ip.conf'
 #export NAD_DENY_PAGE='# error_page 403 http://example.com/forbidden.html;'
 
-# redefine this function if you need reports
-nad_report_attack(){ true; }
-
-[ -e .settings ] && source .settings
+# redefine this function if you need reports other than sdtout
+nad_report(){ echo "$1"; }
 
 _NAD_RUNDATE=$(date +%s)
+_NAD_LOCK_FILE="/var/lock/nad"
+
+[ -e .settings ] && source .settings
+[ -e $_NAD_LOCK_FILE ] && { nad_report "locked $(cat $_NAD_LOCK_FILE)"; exit 1; }
+
+echo $_NAD_RUNDATE > $_NAD_LOCK_FILE
 
 # list blocked
 eval "declare -A nad_blocked=(
@@ -94,5 +96,12 @@ fi
     echo '}'
 } > $NAD_DENY_FILE
 
-# reload nginx
-# try first
+
+# reload nginx, try first
+/usr/sbin/nginx -tq && {
+    service nginx reload \
+        && rm -rf $_NAD_LOCK_FILE \
+        || nad_report "nad cant reload nginx"
+} || {
+    nad_report "nad cant check nginx conf"
+}
