@@ -19,7 +19,7 @@ nad_report(){ echo "$1"; }
 _NAD_RUNDATE=$(date +%s)
 _NAD_LOCK_FILE="/var/lock/nad"
 
-[ -e .settings ] && source .settings
+[ -e /etc/nad.conf ] && source /etc/nad.conf
 [ -e $_NAD_LOCK_FILE ] && { nad_report "locked $(cat $_NAD_LOCK_FILE)"; exit 1; }
 
 echo $_NAD_RUNDATE > $_NAD_LOCK_FILE
