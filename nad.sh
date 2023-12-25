@@ -25,6 +25,7 @@ _NAD_LOCK_FILE="/var/lock/nad"
 echo $_NAD_RUNDATE > $_NAD_LOCK_FILE
 
 ############################## list blocked
+[ -e $NAD_DENY_FILE ] || { touch $NAD_DENY_FILE; }
 eval "declare -A nad_blocked=(
     $(
         {
