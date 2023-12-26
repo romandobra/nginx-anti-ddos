@@ -91,7 +91,10 @@ fi
         if [[ $NAD_WHITE_LIST =~ $i ]]; then
             echo "# whitelisted $i #$_NAD_RUNDATE ${nad_new[$i]}"
         else
-            echo "    deny $i #$_NAD_RUNDATE ${nad_new[$i]}"
+            echo "deny $i #$_NAD_RUNDATE ${nad_new[$i]}"
+
+# add ip to report
+            _NAD_REPORT="${_NAD_REPORT:+"$_NAD_REPORT "}$i:${nad_new[$i]}"
         fi
     done
 
@@ -110,13 +113,12 @@ fi
 [ ! $NAD_TESTING ] && {
     /usr/sbin/nginx -tq && {
         service nginx reload \
-            && rm -rf $_NAD_LOCK_FILE \
-            || nad_report "nad cant reload nginx"
+            || nad_report "cant reload nginx"
     } || {
-        nad_report "nad cant check nginx conf"
+        nad_report "cant check nginx conf"
     }
-} || rm -rf $_NAD_LOCK_FILE
-
-[ ${#nad_new[@]} -gt $NAD_REPORT_MAX_REQUESTS ] && {
-    nad_report $NAD_REPORT_NAME
 }
+
+[ "x$_NAD_REPORT" == "x"  ] || { nad_report "$NAD_REPORT_NAME" "$_NAD_REPORT"; }
+
+rm -rf $_NAD_LOCK_FILE
