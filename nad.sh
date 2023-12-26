@@ -11,7 +11,7 @@ export NAD_COOLDOWN=59
 export NAD_LOG_GREP="grep -e '$(date '+%d/%b/%Y:%H:%M')' -e '$(date -d 'minute ago' '+%d/%b/%Y:%H:%M')'"
 
 export NAD_DENY_FILE='nad_deny_ip.conf'
-# TODO export NAD_DENY_PAGE='# error_page 403 http://example.com/forbidden.html;'
+export NAD_DENY_PAGE='#error_page 403 http://example.com/forbidden.html;'
 
 ############################## define report function
 nad_report(){ echo "$1"; }
@@ -76,6 +76,8 @@ fi
 {
     echo 'location / {'
 
+    echo "$NAD_DENY_PAGE"
+
     echo "# new $((${#nad_state[@]}/2)) [+1] at $_NAD_RUNDATE"
     for i in ${!nad_state[@]}; do
 
@@ -83,14 +85,14 @@ fi
         if [[ $NAD_WHITE_LIST =~ $i ]]; then
             echo "# whitelisted $i #$_NAD_RUNDATE"
         else
-            echo "deny $i #$_NAD_RUNDATE ${nad_state[$i]}"
+            echo "    deny $i #$_NAD_RUNDATE ${nad_state[$i]}"
         fi
     done
 
     echo "# old $((${#nad_blocked[@]}/2)) [+1]"
     for i in ${!nad_blocked[@]}; do
         if [[ ${i:0:1} == "_" ]]; then continue; fi
-        echo "deny $i #${nad_blocked[$i]} ${nad_blocked[_$i]}"
+        echo "    deny $i #${nad_blocked[$i]} ${nad_blocked[_$i]}"
     done
 
     echo '}'
