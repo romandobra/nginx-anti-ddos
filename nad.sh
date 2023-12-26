@@ -5,9 +5,9 @@ set -e
 export NAD_TESTING=true # dont restart nginx (default)
 export NAD_WHITE_LIST='43.142.47.190'
 export NAD_LOG_FILE='access_log'
-export NAD_LOG_TAIL=100
-export NAD_MAX_REQUESTS=2
-export NAD_COOLDOWN=5
+export NAD_LOG_TAIL=1000
+export NAD_MAX_REQUESTS=200
+export NAD_COOLDOWN=59
 export NAD_LOG_GREP="grep -e '$(date '+%d/%b/%Y:%H:%M')' -e '$(date -d 'minute ago' '+%d/%b/%Y:%H:%M')'"
 
 export NAD_DENY_FILE='nad_deny_ip.conf'
@@ -39,6 +39,7 @@ eval "declare -A nad_blocked=(
                 if [ $(( $_NAD_RUNDATE - $_date )) -gt $NAD_COOLDOWN ]; then continue; fi
 
                 echo "[${_ip%;}]=$_date"
+                echo "[_${_ip%;}]=$_number"
             done
     } | sort
     )
@@ -88,7 +89,9 @@ fi
 
     echo "# old ${#nad_blocked[@]}"
     for i in ${!nad_blocked[@]}; do
-    echo "deny $i #${nad_blocked[$i]}"; done
+        if [[ ${i:0:1} == "_" ]]; then continue; fi
+        echo "deny $i #${nad_blocked[$i]} ${nad_blocked[_$i]}"
+    done
 
     echo '}'
 } > $NAD_DENY_FILE
