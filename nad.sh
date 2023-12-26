@@ -31,7 +31,7 @@ eval "declare -A nad_blocked=(
         {
         cat $NAD_DENY_FILE \
         | grep -w deny \
-        | while read _deny_word _ip _date
+        | while read _deny_word _ip _date _number
             do
                 _date=(${_date//[^[:alnum:]]/})
 
@@ -76,14 +76,14 @@ fi
 {
     echo 'location / {'
 
-    echo "# new ${#nad_state[@]} at $_NAD_RUNDATE"
+    echo "# new $((${#nad_state[@]}/2))[+1] at $_NAD_RUNDATE"
     for i in ${!nad_state[@]}; do
 
 # comment whitelisted
         if [[ $NAD_WHITE_LIST =~ $i ]]; then
             echo "# whitelisted $i #$_NAD_RUNDATE"
         else
-            echo "deny $i #$_NAD_RUNDATE"
+            echo "deny $i #$_NAD_RUNDATE ${nad_state[$i]}"
         fi
     done
 
