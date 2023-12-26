@@ -15,7 +15,20 @@ user	0m0.011s
 sys	0m0.012s
 ```
 
-## The logic
+## The logic (`egrep '^#' nad.sh`)
+```
+#!/bin/env bash
+############################## define report function
+############################## list blocked
+# skip if cooldown is over
+############################## list new requests
+# count log lines
+# skip if lower than NAD_MAX_REQUESTS
+# skip if aready blocked
+############################## update deny_ip file
+# comment whitelisted
+############################## reload nginx, try first
+```
 
 
 ## deny_ip file convention
