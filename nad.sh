@@ -7,7 +7,7 @@ export NAD_WHITE_LIST='43.142.47.190'
 export NAD_LOG_FILE='access_log'
 export NAD_LOG_TAIL=1000
 export NAD_MAX_REQUESTS=200
-export NAD_COOLDOWN=59
+export NAD_COOLDOWN=57 # three seconds less
 export NAD_LOG_GREP="grep -e '$(date '+%d/%b/%Y:%H:%M')' -e '$(date -d 'minute ago' '+%d/%b/%Y:%H:%M')'"
 
 export NAD_DENY_FILE='nad_deny_ip.conf'
