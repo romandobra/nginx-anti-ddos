@@ -7,6 +7,8 @@ export NAD_WHITE_LIST='43.142.47.190'
 export NAD_LOG_FILE='access_log'
 export NAD_LOG_TAIL=1000
 export NAD_MAX_REQUESTS=200
+export NAD_REPORT_NAME='my_website'
+export NAD_REPORT_MAX_REQUESTS=200
 export NAD_COOLDOWN=57 # three seconds less
 export NAD_LOG_GREP="grep -e '$(date '+%d/%b/%Y:%H:%M')' -e '$(date -d 'minute ago' '+%d/%b/%Y:%H:%M')'"
 
@@ -17,6 +19,7 @@ export NAD_DENY_PAGE='#error_page 403 http://example.com/forbidden.html;'
 nad_report(){ echo "$1"; }
 
 _NAD_RUNDATE=$(date +%s)
+_NAD_RUNDATE_H=$(date -d@$_NAD_RUNDATE '+%d/%b/%Y:%H:%M:%S')
 _NAD_LOCK_FILE="/var/lock/nad"
 
 [ -e /etc/nad.conf ] && source /etc/nad.conf
@@ -75,7 +78,7 @@ fi
 ############################## update deny_ip file
 {
     echo 'location / {'
-    echo "# run $(date -d@$_NAD_RUNDATE '+%d/%b/%Y:%H:%M:%S')"
+    echo "# run"
     echo "# max $NAD_MAX_REQUESTS cooldown $NAD_COOLDOWN"
     echo "#"
     echo "$NAD_DENY_PAGE"
@@ -113,3 +116,7 @@ fi
         nad_report "nad cant check nginx conf"
     }
 } || rm -rf $_NAD_LOCK_FILE
+
+[ ${#nad_new[@]} -gt $NAD_REPORT_MAX_REQUESTS ] && {
+    nad_report $NAD_REPORT_NAME
+}
