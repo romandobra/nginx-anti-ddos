@@ -75,10 +75,10 @@ fi
 ############################## update deny_ip file
 {
     echo 'location / {'
-
+    echo "# run_date $_NAD_RUNDATE"
     echo "$NAD_DENY_PAGE"
 
-    echo "# new $((${#nad_state[@]}/2)) [+1] at $_NAD_RUNDATE"
+    echo "# new $((${#nad_state[@]}/2))"
     for i in ${!nad_state[@]}; do
 
 # comment whitelisted
@@ -89,7 +89,7 @@ fi
         fi
     done
 
-    echo "# old $((${#nad_blocked[@]}/2)) [+1]"
+    echo "# old $((${#nad_blocked[@]}/2))"
     for i in ${!nad_blocked[@]}; do
         if [[ ${i:0:1} == "_" ]]; then continue; fi
         echo "    deny $i #${nad_blocked[$i]} ${nad_blocked[_$i]}"
