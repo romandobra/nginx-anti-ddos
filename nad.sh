@@ -89,7 +89,7 @@ fi
         fi
     done
 
-    echo "# old ${#nad_blocked[@]}"
+    echo "# old $((${#nad_blocked[@]}/2)) [+1]"
     for i in ${!nad_blocked[@]}; do
         if [[ ${i:0:1} == "_" ]]; then continue; fi
         echo "    deny $i #${nad_blocked[$i]} ${nad_blocked[_$i]}"
