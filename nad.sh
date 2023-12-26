@@ -78,7 +78,7 @@ fi
 ############################## update deny_ip file
 {
     echo 'location / {'
-    echo "# run"
+    echo "# run $_NAD_RUNDATE_H"
     echo "# max $NAD_MAX_REQUESTS cooldown $NAD_COOLDOWN"
     echo "#"
     echo "$NAD_DENY_PAGE"
