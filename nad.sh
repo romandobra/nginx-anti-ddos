@@ -26,7 +26,7 @@ echo $_NAD_RUNDATE > $_NAD_LOCK_FILE
 
 ############################## list blocked
 [ -e $NAD_DENY_FILE ] || { touch $NAD_DENY_FILE; }
-eval "declare -A nad_blocked=(
+eval "declare -A nad_old=(
     $(
         {
         cat $NAD_DENY_FILE \
@@ -50,7 +50,7 @@ eval "declare -A nad_blocked=(
 _NAD_LOG_COUNT=($(wc -l $NAD_LOG_FILE | cut -d' ' -f1))
 
 if [ $_NAD_LOG_COUNT -gt $NAD_LOG_TAIL ]; then
-    eval "declare -A nad_state=(
+    eval "declare -A nad_new=(
         $({
         tail -n$NAD_LOG_TAIL $NAD_LOG_FILE \
             | eval "$NAD_LOG_GREP" \
@@ -64,7 +64,7 @@ if [ $_NAD_LOG_COUNT -gt $NAD_LOG_TAIL ]; then
                     if [ $_number -lt $NAD_MAX_REQUESTS ]; then continue; fi
 
 # skip if aready blocked
-                    [ "${nad_blocked[$_ip]+abc}" ] && continue
+                    [ "${nad_old[$_ip]+abc}" ] && continue
 
                     echo "[$_ip]=$_number"
                 done
@@ -81,22 +81,22 @@ fi
     echo "$NAD_DENY_PAGE"
     echo "#"
 
-    echo "# new $((${#nad_state[@]}/2))"
-    for i in ${!nad_state[@]}; do
+    echo "# new $((${#nad_new[@]}/2))"
+    for i in ${!nad_new[@]}; do
 
 # comment whitelisted
         if [[ $NAD_WHITE_LIST =~ $i ]]; then
-            echo "# whitelisted $i #$_NAD_RUNDATE ${nad_state[$i]}"
+            echo "# whitelisted $i #$_NAD_RUNDATE ${nad_new[$i]}"
         else
-            echo "    deny $i #$_NAD_RUNDATE ${nad_state[$i]}"
+            echo "    deny $i #$_NAD_RUNDATE ${nad_new[$i]}"
         fi
     done
 
     echo "#"
-    echo "# old $((${#nad_blocked[@]}/2))"
-    for i in ${!nad_blocked[@]}; do
+    echo "# old $((${#nad_old[@]}/2))"
+    for i in ${!nad_old[@]}; do
         if [[ ${i:0:1} == "_" ]]; then continue; fi
-        echo "    deny $i #${nad_blocked[$i]} ${nad_blocked[_$i]}"
+        echo "    deny $i #${nad_old[$i]} ${nad_old[_$i]}"
     done
 
     echo '}'
