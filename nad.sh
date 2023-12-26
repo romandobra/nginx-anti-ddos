@@ -5,7 +5,7 @@ set -e
 export NAD_TESTING=true # dont restart nginx (default)
 export NAD_WHITE_LIST='43.142.47.190'
 export NAD_LOG_FILE='access_log'
-export NAD_LINES_TO_CHECK=100
+export NAD_LOG_TAIL=100
 export NAD_MAX_REQUESTS=2
 export NAD_COOLDOWN=5
 export NAD_LOG_GREP="grep -e '$(date '+%d/%b/%Y:%H:%M')' -e '$(date -d 'minute ago' '+%d/%b/%Y:%H:%M')'"
@@ -48,10 +48,10 @@ eval "declare -A nad_blocked=(
 # count log lines
 _NAD_LOG_COUNT=($(wc -l $NAD_LOG_FILE | cut -d' ' -f1))
 
-if [ $_NAD_LOG_COUNT -gt $NAD_LINES_TO_CHECK ]; then
+if [ $_NAD_LOG_COUNT -gt $NAD_LOG_TAIL ]; then
     eval "declare -A nad_state=(
         $({
-        tail -n$NAD_LINES_TO_CHECK $NAD_LOG_FILE \
+        tail -n$NAD_LOG_TAIL $NAD_LOG_FILE \
             | eval "$NAD_LOG_GREP" \
             | cut -d' ' -f1 \
             | sort \
