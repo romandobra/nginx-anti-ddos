@@ -76,7 +76,7 @@ fi
 {
     echo 'location / {'
 
-    echo "# new $((${#nad_state[@]}/2))[+1] at $_NAD_RUNDATE"
+    echo "# new $((${#nad_state[@]}/2)) [+1] at $_NAD_RUNDATE"
     for i in ${!nad_state[@]}; do
 
 # comment whitelisted
@@ -87,7 +87,7 @@ fi
         fi
     done
 
-    echo "# old ${#nad_blocked[@]}"
+    echo "# old $((${#nad_blocked[@]}/2)) [+1]"
     for i in ${!nad_blocked[@]}; do
         if [[ ${i:0:1} == "_" ]]; then continue; fi
         echo "deny $i #${nad_blocked[$i]} ${nad_blocked[_$i]}"
