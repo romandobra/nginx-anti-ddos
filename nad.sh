@@ -75,8 +75,11 @@ fi
 ############################## update deny_ip file
 {
     echo 'location / {'
-    echo "# run_date $_NAD_RUNDATE"
+    echo "# run $(date -d@$_NAD_RUNDATE '+%d/%b/%Y:%H:%M:%S')"
+    echo "# max $NAD_MAX_REQUESTS cooldown $NAD_COOLDOWN"
+    echo "#"
     echo "$NAD_DENY_PAGE"
+    echo "#"
 
     echo "# new $((${#nad_state[@]}/2))"
     for i in ${!nad_state[@]}; do
@@ -89,6 +92,7 @@ fi
         fi
     done
 
+    echo "#"
     echo "# old $((${#nad_blocked[@]}/2))"
     for i in ${!nad_blocked[@]}; do
         if [[ ${i:0:1} == "_" ]]; then continue; fi
