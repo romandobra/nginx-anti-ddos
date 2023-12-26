@@ -83,7 +83,7 @@ fi
 
 # comment whitelisted
         if [[ $NAD_WHITE_LIST =~ $i ]]; then
-            echo "# whitelisted $i #$_NAD_RUNDATE"
+            echo "# whitelisted $i #$_NAD_RUNDATE ${nad_state[$i]}"
         else
             echo "    deny $i #$_NAD_RUNDATE ${nad_state[$i]}"
         fi
